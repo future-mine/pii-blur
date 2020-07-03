@@ -10,11 +10,12 @@ import sys
 
 
 def alphaBlend(img1, img2, mask):
-    print(mask)
+    # print(mask)
     if mask.ndim==3 and mask.shape[-1] == 3:
         alpha = mask/255.0
     else:
         alpha = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)/255.0
+    print(alpha)
     blended = cv2.convertScaleAbs(img1*(1-alpha) + img2*alpha)
     return blended
 
@@ -30,29 +31,67 @@ def blurImageWithCircle(originalimg, circles):
         mask = cv2.GaussianBlur(mask, (21,21),11 )
 
         blured = cv2.GaussianBlur(img, (21,21), 11)
-
         img = alphaBlend(img, blured, mask)
     return img
 
 
 def blurFile(face_cascade, inputfile, outputfile):
     img = cv2.imread(inputfile)
-
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # print(gray)
-    faces = face_cascade.detectMultiScale(gray, 1.2, 1)
-
+    print(img.shape)
+    scale = 2 # percent of original size
+    uniwidth = img.shape[1]
+    uniheight = img.shape[0]
+    width = int(uniwidth * scale)
+    height = int(uniheight * scale)
+    dim = (width, height)
+    print(img.shape)
+    # resize image
+    resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+    dst = cv2.GaussianBlur(resized,(scale+1,scale+1),cv2.BORDER_DEFAULT)
+    print(uniwidth, uniheight)
     circles = []
+
+
+    gray = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
+
+    # print(gray)
+    faces = face_cascade.detectMultiScale(gray, 1.1, 2)
+
     for (x,y,w,h) in faces:
         radius = h
         if w > h:
             radius = w
         
-        circles.append([x+int(w/2), int(y+h/2) , radius])            
+        circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
+
+    # for u in range(0, width, uniwidth):
+    #     for v in range(0, height, uniheight):
+    #         u1 = (u+uniwidth+int(uniwidth/10))
+    #         v1 = (v+uniheight+int(uniheight/10))
+    #         if u1 > width:
+    #             u1 = width
+    #         if v1 > height:
+    #             v1 = height
+    #         uniimag = dst[v:v1, u:u1]
+    #         print(uniimag.shape)
+    #         gray = cv2.cvtColor(uniimag, cv2.COLOR_BGR2GRAY)
+        
+    #         # print(gray)
+    #         faces = face_cascade.detectMultiScale(gray, 1.1, 2)
+
+    #         for (x,y,w,h) in faces:
+    #             radius = h
+    #             if w > h:
+    #                 radius = w
+                
+    #             circles.append([int((y+h/2)/scale), int((x+w/2)/scale), int(radius/9)])            
     blurimg = blurImageWithCircle(img, circles)
+        
+    # resized = cv2.resize(dst, (img.shape[1]*2, img.shape[0]*2), interpolation = cv2.INTER_AREA)
+    
 
 
-    filename = 'aresult.jpg'
+    # filename = 'aresult.jpg'
     cv2.imwrite(outputfile, blurimg)
  
  
