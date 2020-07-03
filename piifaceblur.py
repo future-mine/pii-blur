@@ -59,7 +59,7 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
     gray = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
 
     # print(gray)
-    faces = face_cascade.detectMultiScale(gray, 1.2, 1)
+    faces = face_cascade.detectMultiScale(gray, 1.2, 2)
 
     for (x,y,w,h) in faces:
         radius = h
@@ -69,7 +69,7 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
         circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
         rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
 
-    licenses = license_cascade.detectMultiScale(gray, 1.2, 1)
+    licenses = license_cascade.detectMultiScale(gray, 1.2, 2)
 
     for (x,y,w,h) in licenses:
         radius = h
@@ -102,7 +102,7 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
     #             circles.append([int((x+w/2)/scale), int((y+h/2)/scale), int(radius/9)])            
     blurimg = blurImageWithCircle(img, circles)
     
-    reimg = drawRectangle(blurimg, rectangles)
+    # reimg = drawRectangle(blurimg, rectangles)
     # resized = cv2.resize(dst, (img.shape[1]*2, img.shape[0]*2), interpolation = cv2.INTER_AREA)
     
 
