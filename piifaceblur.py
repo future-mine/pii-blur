@@ -15,7 +15,7 @@ def alphaBlend(img1, img2, mask):
         alpha = mask/255.0
     else:
         alpha = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)/255.0
-    print(alpha)
+    # print('alpha: ', alpha)
     blended = cv2.convertScaleAbs(img1*(1-alpha) + img2*alpha)
     return blended
 
@@ -34,8 +34,13 @@ def blurImageWithCircle(originalimg, circles):
         img = alphaBlend(img, blured, mask)
     return img
 
+def drawRectangle(blurimg, rectangles):
+    img = blurimg
+    for rect in rectangles:
+        img = cv2.rectangle(img, (rect[0], rect[1]), (rect[2], rect[3]), (255,255,0), 2)
+    return img
 
-def blurFile(face_cascade, inputfile, outputfile):
+def blurFile(face_cascade, inputfile, outputfile, twicefile):
     img = cv2.imread(inputfile)
     print(img.shape)
     scale = 2 # percent of original size
@@ -44,18 +49,17 @@ def blurFile(face_cascade, inputfile, outputfile):
     width = int(uniwidth * scale)
     height = int(uniheight * scale)
     dim = (width, height)
-    print(img.shape)
     # resize image
     resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
     dst = cv2.GaussianBlur(resized,(scale+1,scale+1),cv2.BORDER_DEFAULT)
     print(uniwidth, uniheight)
     circles = []
-
-
+    rectangles = []
+    cv2.imwrite(twicefile, dst)
     gray = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
 
     # print(gray)
-    faces = face_cascade.detectMultiScale(gray, 1.1, 2)
+    faces = face_cascade.detectMultiScale(gray, 1.2, 1)
 
     for (x,y,w,h) in faces:
         radius = h
@@ -63,7 +67,7 @@ def blurFile(face_cascade, inputfile, outputfile):
             radius = w
         
         circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
-
+        rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
     # for u in range(0, width, uniwidth):
     #     for v in range(0, height, uniheight):
     #         u1 = (u+uniwidth+int(uniwidth/10))
@@ -84,9 +88,10 @@ def blurFile(face_cascade, inputfile, outputfile):
     #             if w > h:
     #                 radius = w
                 
-    #             circles.append([int((y+h/2)/scale), int((x+w/2)/scale), int(radius/9)])            
+    #             circles.append([int((x+w/2)/scale), int((y+h/2)/scale), int(radius/9)])            
     blurimg = blurImageWithCircle(img, circles)
-        
+    
+    reimg = drawRectangle(blurimg, rectangles)
     # resized = cv2.resize(dst, (img.shape[1]*2, img.shape[0]*2), interpolation = cv2.INTER_AREA)
     
 
@@ -96,7 +101,9 @@ def blurFile(face_cascade, inputfile, outputfile):
  
  
 def main(argv):
-    face_cascade = cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml')
+    # face_cascade = cv2.CascadeClassifier('models/haarcascade_fullbody.xml')
+    # face_cascade = cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml')
+    face_cascade = cv2.CascadeClassifier('models/HS.xml')    
     inputdir = argv[0]
     outputdir = argv[1]
     if isdir(outputdir):
@@ -108,7 +115,8 @@ def main(argv):
     for inputfile in inputfiles:
         infile = inputdir + '/' + inputfile
         outfile = outputdir + '/' + 'blur_' + inputfile
-        blurFile(face_cascade, infile,outfile)
+        twicefile = outputdir + '/' + 'twice_' + inputfile
+        blurFile(face_cascade, infile,outfile, twicefile)
         
         
     # testin = 'testimages/Untitled.jpg'
