@@ -50,8 +50,12 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
     height = int(uniheight * scale)
     dim = (width, height)
     # resize image
+    if scale % 2==0:
+        resizescale = scale+1
+    else:
+        resizescale = scale
     resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-    dst = cv2.GaussianBlur(resized,(scale+1,scale+1),cv2.BORDER_DEFAULT)
+    dst = cv2.GaussianBlur(resized,(resizescale,resizescale),cv2.BORDER_DEFAULT)
     print(uniwidth, uniheight)
     circles = []
     rectangles = []
@@ -59,7 +63,7 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
     gray = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
 
     # print(gray)
-    faces = face_cascade.detectMultiScale(gray, 1.2, 2)
+    faces = face_cascade.detectMultiScale(gray, 1.2, 1)
 
     for (x,y,w,h) in faces:
         radius = h
@@ -69,15 +73,15 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
         circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
         rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
 
-    licenses = license_cascade.detectMultiScale(gray, 1.2, 2)
+    # licenses = license_cascade.detectMultiScale(gray, 1.2, 2)
 
-    for (x,y,w,h) in licenses:
-        radius = h
-        if w > h:
-            radius = w
+    # for (x,y,w,h) in licenses:
+    #     radius = h
+    #     if w > h:
+    #         radius = w
         
-        circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
-        rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
+    #     circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
+    #     rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
 
     # for u in range(0, width, uniwidth):
     #     for v in range(0, height, uniheight):
