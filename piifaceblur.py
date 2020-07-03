@@ -40,7 +40,7 @@ def drawRectangle(blurimg, rectangles):
         img = cv2.rectangle(img, (rect[0], rect[1]), (rect[2], rect[3]), (255,255,0), 2)
     return img
 
-def blurFile(face_cascade, inputfile, outputfile, twicefile):
+def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
     img = cv2.imread(inputfile)
     print(img.shape)
     scale = 2 # percent of original size
@@ -68,6 +68,17 @@ def blurFile(face_cascade, inputfile, outputfile, twicefile):
         
         circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
         rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
+
+    licenses = license_cascade.detectMultiScale(gray, 1.2, 1)
+
+    for (x,y,w,h) in licenses:
+        radius = h
+        if w > h:
+            radius = w
+        
+        circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
+        rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
+
     # for u in range(0, width, uniwidth):
     #     for v in range(0, height, uniheight):
     #         u1 = (u+uniwidth+int(uniwidth/10))
@@ -102,8 +113,8 @@ def blurFile(face_cascade, inputfile, outputfile, twicefile):
  
 def main(argv):
     # face_cascade = cv2.CascadeClassifier('models/haarcascade_fullbody.xml')
-    # face_cascade = cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml')
-    face_cascade = cv2.CascadeClassifier('models/HS.xml')    
+    face_cascade = cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml')
+    license_cascade = cv2.CascadeClassifier('models/license.xml')    
     inputdir = argv[0]
     outputdir = argv[1]
     if isdir(outputdir):
@@ -116,7 +127,7 @@ def main(argv):
         infile = inputdir + '/' + inputfile
         outfile = outputdir + '/' + 'blur_' + inputfile
         twicefile = outputdir + '/' + 'twice_' + inputfile
-        blurFile(face_cascade, infile,outfile, twicefile)
+        blurFile(face_cascade, license_cascade, infile,outfile, twicefile)
         
         
     # testin = 'testimages/Untitled.jpg'
