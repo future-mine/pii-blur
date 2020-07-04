@@ -46,23 +46,32 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
     scale = 2 # percent of original size
     uniwidth = img.shape[1]
     uniheight = img.shape[0]
+    # norm_img = np.zeros((uniwidth, uniheight))
+    # norm_img = cv2.normalize(img, norm_img, 0, 255, cv2.NORM_MINMAX)
+    # cv2.imwrite(twicefile, norm_img)
     width = int(uniwidth * scale)
     height = int(uniheight * scale)
     dim = (width, height)
     # resize image
     if scale % 2==0:
-        resizescale = scale+1
+        blurwindow = scale+1
     else:
-        resizescale = scale
+        blurwindow = scale + 2
     resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-    dst = cv2.GaussianBlur(resized,(resizescale,resizescale),cv2.BORDER_DEFAULT)
+    dst = cv2.GaussianBlur(resized,(blurwindow,blurwindow),cv2.BORDER_DEFAULT)
+    
+    
+    # dst = resized #normalized image
+    
+    
     print(uniwidth, uniheight)
     circles = []
     rectangles = []
-    cv2.imwrite(twicefile, dst)
+    # cv2.imwrite(twicefile, dst)
     gray = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
 
     # print(gray)
+    
     faces = face_cascade.detectMultiScale(gray, 1.2, 1)
 
     for (x,y,w,h) in faces:
@@ -73,15 +82,16 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
         circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
         rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
 
-    # licenses = license_cascade.detectMultiScale(gray, 1.2, 2)
 
-    # for (x,y,w,h) in licenses:
-    #     radius = h
-    #     if w > h:
-    #         radius = w
+    licenses = license_cascade.detectMultiScale(gray, 1.2, 2)
+
+    for (x,y,w,h) in licenses:
+        radius = h
+        if w > h:
+            radius = w
         
-    #     circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
-    #     rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
+        circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
+        rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
 
     # for u in range(0, width, uniwidth):
     #     for v in range(0, height, uniheight):
@@ -117,7 +127,7 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
  
 def main(argv):
     # face_cascade = cv2.CascadeClassifier('models/haarcascade_fullbody.xml')
-    face_cascade = cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml')
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt.xml')
     license_cascade = cv2.CascadeClassifier('models/license.xml')    
     inputdir = argv[0]
     outputdir = argv[1]
