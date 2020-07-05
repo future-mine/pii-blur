@@ -83,15 +83,15 @@ def blurFile(face_cascade, license_cascade, inputfile, outputfile, twicefile):
         rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
 
 
-    # licenses = license_cascade.detectMultiScale(gray, 1.2, 2)
+    licenses = license_cascade.detectMultiScale(gray, 1.2, 2)
 
-    # for (x,y,w,h) in licenses:
-    #     radius = h
-    #     if w > h:
-    #         radius = w
+    for (x,y,w,h) in licenses:
+        radius = h
+        if w > h:
+            radius = w
         
-    #     circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
-    #     rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
+        circles.append([ int((x+w/2)/scale), int((y+h/2)/scale), int(radius/scale)])            
+        rectangles.append([int(x/scale), int(y/scale), int((x+w)/scale), int((y+h)/scale)])
 
     # for u in range(0, width, uniwidth):
     #     for v in range(0, height, uniheight):
