@@ -98,7 +98,7 @@ Personally Identifiable Information (PII) Blur is licensed under a [GNU AGPLv3 L
         pip3 install keras==2.3.1
         pip3 install imageai
 3. Run the script
-    python piibodyblur.py "<image folder name>" "<out image folder name>" "<percentage>"
-    
+    python pii-blur.py "<image folder name>" "<out image folder name>" "<percentage>"
+
     ex:
-    python piibodyblur.py readme-images outcar 25
+        python pii-blur.py readme-images outimages 25
